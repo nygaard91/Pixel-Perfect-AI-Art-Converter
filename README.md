@@ -53,6 +53,9 @@ This hands-on approach makes it easier to generate pixel art that meets the spec
   Export your pixel art as a PNG using the available export buttons. The image is generated at your chosen scale for download.
 
 
+## Installation
+Just download the folder and extract it to any location on your computer. No installation is required! Simply open the file named 'index.html' in your browser, and you're good to go. The code is designed to run directly in the browser without the need for a local environment.
+
 ## Technical Details
 
 ### Grid Cell System
