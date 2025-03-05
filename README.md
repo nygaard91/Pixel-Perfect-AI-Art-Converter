@@ -8,6 +8,7 @@ AI-generated pixel art is popular, but it often isn’t truly “pixel perfect.�
 This hands-on approach makes it easier to generate pixel art that meets the specific requirements of game assets and other professional applications.
 
 **Short demo video (120 sec): https://youtu.be/Em2BzHmpIwY**
+
 (Artwork by: https://civitai.com/user/Konan)
 
 ## Usage Guide
