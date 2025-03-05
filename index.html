@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Art Converter</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="container">
+    <!-- Side Panel: shows controls for the active step -->
+    <div id="sidePanel">
+      <!-- Step 1: Setup -->
+      <div id="step1" class="step">
+        <h2>Step 1: Setup</h2>
+        <label for="gridWidthSelect">Art Width:</label>
+        <select id="gridWidthSelect">
+          <option value="16">16 px</option>
+          <option value="32">32 px</option>
+          <option value="48">48 px</option>
+          <option value="64">64 px</option>
+          <option value="80">80 px</option>
+          <option value="96">96 px</option>
+          <option value="112">112 px</option>
+          <option value="128">128 px</option>
+          <option value="256">256 px (not recommended)</option>
+          <option value="512">512 px (not recommended)</option>
+          <option value="1024">1024 px (not recommended)</option>
+        </select>
+        <br>
+        <br>
+        <label for="gridHeightSelect">Art Height:</label>
+        <select id="gridHeightSelect">
+          <option value="16">16 px</option>
+          <option value="32">32 px</option>
+          <option value="48">48 px</option>
+          <option value="64">64 px</option>
+          <option value="80">80 px</option>
+          <option value="96">96 px</option>
+          <option value="112">112 px</option>
+          <option value="128">128 px</option>
+          <option value="256">256 px (not recommended)</option>
+          <option value="512">512 px (not recommended)</option>
+          <option value="1024">1024 px (not recommended)</option>
+        </select>
+        <br>
+        <br>
+        <label for="imageInput">Upload Image:</label>
+        <input type="file" id="imageInput" accept="image/*" />
+        <br>
+        <br>
+        <button id="uploadBtn">Upload (Next Step)</button>
+      </div>
+      <!-- Step 2: Position & Convert -->
+      <div id="step2" class="step" style="display:none;">
+        <h2>Step 2: Position & Convert</h2>
+        <label for="previewSizeSlider">Grid Cell Size (<span id="previewSizeValue">4</span> px):</label>
+        <input type="range" id="previewSizeSlider" min="4" max="16" step="2" value="4" />
+        <br>
+        
+        <br>
+        <label for="zoomSlider">Source Image Zoom:</label>
+        <input type="range" id="zoomSlider" min="10" max="300" value="100" />
+        <br>
+        <label for="convMethod">Conversion Method:</label>
+        <select id="convMethod">
+          <option value="most">Most Used Color</option>
+          <option value="most_light">Most Used Color (prioritize light)</option>
+          <option value="most_dark">Most Used Color (prioritize dark)</option>
+          <option value="average">Average Color</option>
+          <option value="neighbor">Neighbor Color</option>
+        </select>
+        <br>
+        <button id="convertBtn">Convert (Next Step)</button>
+        <button id="resetPositionBtn">Delete</button>
+      </div>
+      <!-- Step 3: Edit & Export -->
+      <div id="step3" class="step" style="display:none;">
+        <h2>Step 3: Edit & Export</h2>
+        <label for="canvasZoomSlider">Canvas Zoom:</label>
+        <input type="range" id="canvasZoomSlider" min="1" max="20" step="1" value="1" />
+        <button id="resetCanvasZoomBtn">Reset Zoom</button>
+        <label><input type="checkbox" id="gridToggle"> Show Grid</label>
+        <br>
+        <br>
+        <label>Tool:</label>
+        <div id="toolContainer">
+          <button id="brushToolBtn" class="tool-btn active-tool">Brush</button>
+          <button id="eraserToolBtn" class="tool-btn">Eraser</button>
+          <button id="magicWandBtn" class="tool-btn">Magic Wand</button>
+        </div>
+        <br>
+        <br>
+        <label for="drawColor">Brush Color:</label>
+        <input type="color" id="drawColor" value="#000000" />
+        <button id="transparentBtn" style="display:none;">Transparent</button>
+        <br>
+        <br>
+        <label for="brushSizeSelect">Tool Size:</label>
+        <select id="brushSizeSelect">
+          <option value="1">1×1</option>
+          <option value="2">2×2</option>
+          <option value="3">3×3</option>
+          <option value="4">4×4</option>
+          <option value="5">5×5</option>
+        </select>
+        <br>
+        <br>
+        <label for="magicWandThresholdSlider">
+          Magic Wand Threshold (<span id="magicWandThresholdValue">5</span>):
+        </label>
+        <input type="range" id="magicWandThresholdSlider" min="0" max="30" value="5" />
+        <br>
+        <br>
+        <div id="recentColorsSection" style="display:none;">
+          <label>Recent Colors:</label>
+          <div id="recentColorsContainer"></div>
+        </div>
+        <br>
+        <br>
+        <div id="exportButtons">
+          <label>Export (png):</label>
+          <button id="exportX1Btn">Export x1</button>
+          <button id="exportX4Btn">Export x4</button>
+          <button id="exportX8Btn">Export x8</button>
+        </div>
+        <button id="resetEditBtn">Delete</button>
+      </div>
+    </div>
+    <!-- Main Content: canvas fills the rest of the page -->
+    <div id="mainContent">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+/* Reset and basic styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #9a9a9a;
+}
+
+/* Container layout: fixed side panel and flexible main area */
+#container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Side Panel */
+#sidePanel {
+  width: 300px;
+  background: #1a1a1a; /* Off-black */
+  color: #e0e0e0; /* Light gray text */
+  border-right: 1px solid #555555;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.step {
+    height: calc(100vh - 40px);
+}
+
+#resetEditBtn, #resetPositionBtn {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;;
+  background: #ff4d4d !important; /* Red */
+  color: #ffffff !important; /* White text */
+}
+
+#sidePanel button {
+  background: #ffd700; /* Yellow */
+  color: #000; /* Black text */
+  border: none;
+  padding: 10px; /* Increased height */
+  margin: 5px 0;
+  width: 100%;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px; /* Rounded corners */
+  transition: background 0.3s ease; /* Smooth hover transition */
+}
+
+
+#sidePanel button:hover {
+  background: #e6c200; /* Darker yellow on hover */
+}
+
+#resetEditBtn:hover, #resetPositionBtn:hover {
+  background: #ba1e1e !important; /* Darker yellow on hover */
+}
+
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  background: #333333; /* Dark gray track */
+  border-radius: 5px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #ffd700; /* Yellow nob, matching buttons */
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #ffd700; /* Yellow nob, matching buttons */
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#sidePanel input[type="color"]{
+  height: 35px !important;
+}
+
+/* Inputs and Selects in Side Panel: Dark background with light text */
+#sidePanel input,
+#sidePanel select {
+  background: #333333; /* Dark gray */
+  color: #e0e0e0; /* Light gray text */
+  border: 1px solid #555555; /* Slightly lighter gray border */
+  margin: 5px 0;
+  width: 100%;
+  padding: 5px;
+  font-size: 14px;
+}
+
+#sidePanel h2 {
+    margin-bottom: 25px;
+    color: #ffd700;
+    font-size: 18px;
+}
+
+#sidePanel label {
+  font-weight: bold;
+}
+
+#sidePanel .step {
+  position: relative;
+  padding-bottom: 50px; /* Space for the sticky button */
+}
+
+/* Recent Colors swatches */
+#recentColorsContainer {
+  margin-top: 5px;
+}
+
+#gridToggle {
+    width: auto !important;
+}
+
+.recent-swatch {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  border: 1px solid #555555; /* Gray border */
+  cursor: pointer;
+}
+
+/* Main Content: Darker checkered background */
+#mainContent {
+  flex: 1;
+  overflow: auto;
+  background: repeating-conic-gradient(#222222 0% 25%, #333333 0% 50%) 50% / 20px 20px;
+  position: relative;
+}
+
+/* Canvas styling */
+#previewCanvas {
+  display: block;
+  background: transparent;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.tool-btn {
+  background: #333333; /* Dark gray */
+  color: #e0e0e0; /* Light gray text */
+  border: 1px solid #555555; /* Gray border */
+  padding: 10px;
+  margin: 2px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.tool-btn.active-tool {
+  background: #ff4d4d !important;
+  color: white !important;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+label input[type="checkbox"] {
+  margin-right: 10px;
+}
