@@ -56,6 +56,11 @@ This hands-on approach makes it easier to generate pixel art that meets the spec
 ## Installation
 Just download the folder and extract it to any location on your computer. No installation is required! Simply open the file named 'index.html' in your browser, and you're good to go. The code is designed to run directly in the browser without the need for a local environment.
 
+## Hotkeys
+* **Ctrl+Z:** Undo action in step 3.
+* **Ctrl+Y:** Redo action in step 3.
+* **Alt+B:** Toggle between light and dark background.
+
 ## Technical Details
 
 ### Grid Cell System
