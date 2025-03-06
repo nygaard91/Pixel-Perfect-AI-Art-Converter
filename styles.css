@@ -31,11 +31,22 @@ body {
 }
 
 #resetEditBtn, #resetPositionBtn {
-  position: absolute !important;
+  /*position: absolute !important;
   bottom: 0 !important;
-  left: 0 !important;;
+  left: 0 !important;*/
   background: #ff4d4d !important; /* Red */
   color: #ffffff !important; /* White text */
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: #ffd700;
 }
 
 #sidePanel button {

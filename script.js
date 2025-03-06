@@ -52,7 +52,7 @@ const step3Div = document.getElementById("step3");
 const gridWidthSelect = document.getElementById("gridWidthSelect");
 const gridHeightSelect = document.getElementById("gridHeightSelect");
 const imageInput = document.getElementById("imageInput");
-const uploadBtn = document.getElementById("uploadBtn");
+//const uploadBtn = document.getElementById("uploadBtn");
 
 const zoomSlider = document.getElementById("zoomSlider");
 const previewSizeSlider = document.getElementById("previewSizeSlider");
@@ -82,7 +82,7 @@ const mainContent = document.getElementById("mainContent");
 
 // Offscreen canvas for image analysis
 let originalCanvas = document.createElement("canvas");
-let origCtx = originalCanvas.getContext("2d");
+let origCtx = originalCanvas.getContext("2d", { willReadFrequently: true });
 
 // Magic Wand Threshold Slider
 const magicWandThresholdSlider = document.getElementById("magicWandThresholdSlider");
@@ -92,11 +92,32 @@ magicWandThresholdSlider.addEventListener("input", function() {
   magicWandThresholdValue.textContent = this.value;
 });
 
+// New global variables for grid color toggle (separate from background)
+let isDarkGrid = true;
+const gridLineColorDarkPreview = "rgba(255,255,255,0.5)";
+const gridLineColorLightPreview = "rgba(0,0,0,0.5)";
+const gridLineColorDarkEdit = "rgba(255,255,255,0.3)";
+const gridLineColorLightEdit = "rgba(0,0,0,0.3)";
+
+
 // Event listeners for new export buttons (Step 3)
 document.getElementById("exportX1Btn").addEventListener("click", () => exportImage(1));
 document.getElementById("exportX4Btn").addEventListener("click", () => exportImage(4));
 document.getElementById("exportX8Btn").addEventListener("click", () => exportImage(8));
 
+
+// New upload button
+uploadBtn.addEventListener("click", () => {
+  gridWidth = parseInt(gridWidthSelect.value);
+  gridHeight = parseInt(gridHeightSelect.value);
+  const file = imageInput.files[0];
+  if (!file) {
+    alert("Please select an image.");
+    return;
+  }
+  loadAndDownscaleImage(file);
+  switchStep(2);
+});
 
 /*********************
  * Utility Functions
@@ -113,6 +134,237 @@ function saveHistory() {
   historyStack.push(deepCopyPixels(pixelColors));
   // Clear redo stack on new action.
   redoStack = [];
+}
+
+/*********************
+ * Draggable/Resizable Source Image Window
+ *********************/
+
+function createSourceWindow() {
+  if (document.getElementById("sourceWindow")) return;
+  
+  const windowDiv = document.createElement("div");
+  windowDiv.id = "sourceWindow";
+  // Set default dimensions.
+  windowDiv.style.width = "300px";
+  windowDiv.style.height = "300px";
+  windowDiv.style.position = "absolute";
+  windowDiv.style.border = "1px solid #555";
+  windowDiv.style.background = "#1a1a1a";
+  windowDiv.style.zIndex = "1000";
+  windowDiv.style.userSelect = "none";
+
+  
+  // Title Bar with minimize button.
+  const titleBar = document.createElement("div");
+  titleBar.id = "sourceWindowTitleBar";
+  titleBar.style.cursor = "move";
+  titleBar.style.background = "#333";
+  titleBar.style.padding = "5px";
+  titleBar.style.display = "flex";
+  titleBar.style.justifyContent = "space-between";
+  titleBar.style.alignItems = "center";
+  
+  const titleText = document.createElement("span");
+  titleText.textContent = "Source Image";
+  titleText.style.color = "#ffd700";
+  
+  const minimizeBtn = document.createElement("button");
+  // Initially, show the collapse icon (▴ means expanded, ▾ means minimized)
+  minimizeBtn.textContent = "▴";
+  minimizeBtn.style.cursor = "pointer";
+  minimizeBtn.style.backgroundColor = "#ffd700";
+  minimizeBtn.style.border = "none";
+  minimizeBtn.style.width = "16px"
+  minimizeBtn.style.height = "16px"
+
+  titleBar.appendChild(titleText);
+  titleBar.appendChild(minimizeBtn);
+  
+  // Content area holds the source image.
+  const contentArea = document.createElement("div");
+  contentArea.id = "sourceWindowContent";
+  contentArea.style.padding = "5px";
+  // Reserve space for the title bar.
+  contentArea.style.height = "calc(100% - 40px)";
+  contentArea.style.overflow = "hidden";
+  
+  // Create a new image element and assign the source.
+  const imgDisplay = new Image();
+  imgDisplay.src = image.src;
+  imgDisplay.style.display = "block";
+  // Ensure the image fits within the container.
+  imgDisplay.style.width = "100%";
+  imgDisplay.style.height = "auto";
+  imgDisplay.style.maxWidth = "100%";
+  imgDisplay.style.webkitUserDrag = "none";
+  contentArea.appendChild(imgDisplay);
+  
+  // Resizer handle.
+  const resizer = document.createElement("div");
+  resizer.style.width = "10px";
+  resizer.style.height = "10px";
+  resizer.style.background = "#ffd700";
+  resizer.style.position = "absolute";
+  resizer.style.right = "0";
+  resizer.style.bottom = "0";
+  resizer.style.cursor = "se-resize";
+  
+  windowDiv.appendChild(titleBar);
+  windowDiv.appendChild(contentArea);
+  windowDiv.appendChild(resizer);
+  document.body.appendChild(windowDiv);
+  
+  // Center the window in the viewport.
+  const rect = windowDiv.getBoundingClientRect();
+  windowDiv.style.left = ((window.innerWidth - rect.width) / 2) + "px";
+  windowDiv.style.top = ((window.innerHeight - rect.height) / 2) + "px";
+  
+  // Draggable functionality.
+  let isDragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  
+  titleBar.addEventListener("mousedown", function(e) {
+    isDragging = true;
+    const rect = windowDiv.getBoundingClientRect();
+    dragOffsetX = e.clientX - rect.left;
+    dragOffsetY = e.clientY - rect.top;
+    e.preventDefault();
+  });
+  window.addEventListener("mousemove", function(e) {
+    if (isDragging) {
+      let newLeft = e.clientX - dragOffsetX;
+      let newTop = e.clientY - dragOffsetY;
+      windowDiv.style.left = newLeft + "px";
+      windowDiv.style.top = newTop + "px";
+    }
+  });
+  window.addEventListener("mouseup", function(e) {
+    if (isDragging) {
+      isDragging = false;
+      // Snap into view so the header remains accessible.
+      snapWindowIntoView(windowDiv);
+    }
+  });
+  
+  // Resizable functionality.
+  let isResizing = false;
+  let resizeStartX = 0;
+  let resizeStartY = 0;
+  let startWidth = 0;
+  let startHeight = 0;
+  
+  resizer.addEventListener("mousedown", function(e) {
+    isResizing = true;
+    resizeStartX = e.clientX;
+    resizeStartY = e.clientY;
+    const rect = windowDiv.getBoundingClientRect();
+    startWidth = rect.width;
+    startHeight = rect.height;
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  window.addEventListener("mousemove", function(e) {
+    if (isResizing) {
+      let newWidth = startWidth + (e.clientX - resizeStartX);
+      let newHeight = startHeight + (e.clientY - resizeStartY);
+      // Enforce minimum dimensions.
+      newWidth = Math.max(newWidth, 150);
+      newHeight = Math.max(newHeight, 100);
+      windowDiv.style.width = newWidth + "px";
+      windowDiv.style.height = newHeight + "px";
+    }
+  });
+  window.addEventListener("mouseup", function(e) {
+    if (isResizing) {
+      isResizing = false;
+    }
+  });
+  
+  // Minimizable functionality.
+  let isMinimized = false;
+  minimizeBtn.addEventListener("click", function() {
+    if (isMinimized) {
+      // Expand the window.
+      contentArea.style.display = "block";
+      resizer.style.display = "block";
+      minimizeBtn.textContent = "▴";
+      isMinimized = false;
+      // Restore height (for example, back to 300px).
+      windowDiv.style.height = "300px";
+      contentArea.style.height = "calc(100% - 40px)";
+    } else {
+      // Collapse to just the title bar.
+      contentArea.style.display = "none";
+      resizer.style.display = "none";
+      minimizeBtn.textContent = "▾";
+      isMinimized = true;
+      // Set window height to the title bar only.
+      windowDiv.style.height = titleBar.offsetHeight + "px";
+    }
+  });
+}
+
+function snapWindowIntoView(winDiv) {
+  const rect = winDiv.getBoundingClientRect();
+  let newLeft = rect.left;
+  let newTop = rect.top;
+  // Ensure at least 30px of the header is visible.
+  const headerMinVisible = 30;
+  if (rect.top < 0) {
+    newTop = 0;
+  }
+  if (rect.left < 0) {
+    newLeft = 0;
+  }
+  if (rect.top + headerMinVisible > window.innerHeight) {
+    newTop = window.innerHeight - headerMinVisible;
+  }
+  if (rect.left + 50 > window.innerWidth) {
+    newLeft = window.innerWidth - 50;
+  }
+  winDiv.style.left = newLeft + "px";
+  winDiv.style.top = newTop + "px";
+}
+
+
+function loadAndDownscaleImage(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const tempImg = new Image();
+    tempImg.onload = function() {
+      const maxSize = 1024;
+      let width = tempImg.width;
+      let height = tempImg.height;
+      // Scale down if the largest dimension exceeds maxSize.
+      if (width > maxSize || height > maxSize) {
+        const scaleFactor = Math.min(maxSize / width, maxSize / height);
+        width = Math.round(width * scaleFactor);
+        height = Math.round(height * scaleFactor);
+      }
+      // Create an offscreen canvas to draw the (possibly downscaled) image.
+      const offscreenCanvas = document.createElement("canvas");
+      offscreenCanvas.width = width;
+      offscreenCanvas.height = height;
+      const offscreenCtx = offscreenCanvas.getContext("2d", { willReadFrequently: true });
+      offscreenCtx.drawImage(tempImg, 0, 0, width, height);
+      // Use the base64 data URL from the canvas as the image source.
+      image.src = offscreenCanvas.toDataURL("image/png");
+      imgLoaded = false;
+      image.onload = function() {
+        imgLoaded = true;
+        // Set up the offscreen canvas for analysis.
+        originalCanvas.width = image.width;
+        originalCanvas.height = image.height;
+        origCtx.clearRect(0, 0, originalCanvas.width, originalCanvas.height);
+        origCtx.drawImage(image, 0, 0);
+        drawPreview();
+      }
+    }
+    tempImg.src = e.target.result;
+  }
+  reader.readAsDataURL(file);
 }
 
 /*********************
@@ -142,10 +394,27 @@ function toggleMainContentBackground() {
   isDarkBackground = !isDarkBackground;
 }
 
+function toggleGridColor() {
+  isDarkGrid = !isDarkGrid;
+  if (currentStep === 2) {
+    drawPreview();
+  } else if (currentStep === 3) {
+    drawPixelArt();
+  }
+}
+
 // Toggle background when Alt+B is pressed.
 window.addEventListener("keydown", (e) => {
   if (e.altKey && e.key.toLowerCase() === "b") {
     toggleMainContentBackground();
+    e.preventDefault();
+  }
+});
+
+// Toggle grid color when Alt+G is pressed.
+window.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "g") {
+    toggleGridColor();
     e.preventDefault();
   }
 });
@@ -171,7 +440,7 @@ function switchStep(step) {
       offsetY = (canvas.height - image.height * imageScale) / 2;
     }
     drawPreview();
-  } else if (step === 3) {
+    } else if (step === 3) {
     // For editing, the canvas size will be gridWidth×canvasZoom by gridHeight×canvasZoom.
     updateCanvasSizeForEdit();
     mainContent.style.overflow = "auto";
@@ -181,6 +450,9 @@ function switchStep(step) {
     historyStack = [];
     redoStack = [];
     saveHistory();
+    
+    // Create the source image window.
+    createSourceWindow();
   }
 }
 
@@ -203,7 +475,7 @@ function drawPreview() {
   // Draw grid lines for preview using gridWidth and gridHeight
   const cellW = canvas.width / gridWidth;
   const cellH = canvas.height / gridHeight;
-  ctx.strokeStyle = "rgba(255,255,255,0.5)";
+  ctx.strokeStyle = isDarkGrid ? gridLineColorDarkPreview : gridLineColorLightPreview;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 1; i < gridWidth; i++) {
@@ -232,7 +504,7 @@ function drawPixelArt() {
   }
   // Draw grid lines if toggle is checked
   if (gridToggle.checked) {
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
+    ctx.strokeStyle = isDarkGrid ? gridLineColorDarkEdit : gridLineColorLightEdit;
     ctx.lineWidth = 1;
     ctx.beginPath();
     for (let i = 1; i < gridWidth; i++) {
@@ -1073,6 +1345,10 @@ function resetAll() {
   recentColorsSection.style.display = "none";
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   switchStep(1);
+
+  // Remove source image window and color scheme elements if present.
+  const sw = document.getElementById("sourceWindow");
+  if (sw) sw.remove();
 }
 
 /*********************
