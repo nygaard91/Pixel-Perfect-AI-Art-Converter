@@ -64,6 +64,7 @@ Just download the folder and extract it to any location on your computer. No ins
 * **Ctrl+Z:** Undo action in step 3.
 * **Ctrl+Y:** Redo action in step 3.
 * **Alt+B:** Toggle between light and dark background.
+* **Alt+G:** Toggle between light and dark grid color.
 
 ## Technical Details
 
